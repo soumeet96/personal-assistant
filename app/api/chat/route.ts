@@ -1,5 +1,5 @@
 import { createGroq } from "@ai-sdk/groq";
-import { streamText } from "ai";
+import { streamText, convertToModelMessages } from "ai";
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: groq("llama-3.3-70b-versatile"),
     system: SYSTEM_PROMPT,
-    messages,
+    messages: await convertToModelMessages(messages),
     maxOutputTokens: 1024,
   });
 
