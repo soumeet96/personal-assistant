@@ -1,65 +1,166 @@
-import Image from "next/image";
+"use client";
+
+import { useChat } from "@ai-sdk/react";
+import { useEffect, useRef, useState } from "react";
+import { Send, Bot, User, Loader2, Trash2 } from "lucide-react";
 
 export default function Home() {
+  const { messages, sendMessage, status, setMessages } = useChat();
+  const [input, setInput] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isLoading = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const submit = () => {
+    const text = input.trim();
+    if (!text || isLoading) return;
+    setInput("");
+    sendMessage({ text });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
+
+  const clearChat = () => setMessages([]);
+
+  const suggestions = [
+    "Give me 5 startup ideas for 2025",
+    "Explain Kubernetes in simple terms",
+    "Write a LinkedIn post about DevOps",
+    "What is the best way to learn system design?",
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col h-screen bg-gray-950 text-gray-100">
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+            <Bot size={18} />
+          </div>
+          <div>
+            <h1 className="font-semibold text-white">Personal Assistant</h1>
+            <p className="text-xs text-gray-400">Powered by Llama 3.3 · Groq</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        {messages.length > 0 && (
+          <button
+            onClick={clearChat}
+            className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-200 transition-colors px-3 py-1.5 rounded-md hover:bg-gray-800"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <Trash2 size={14} />
+            Clear
+          </button>
+        )}
+      </header>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+            <div className="w-16 h-16 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+              <Bot size={32} className="text-indigo-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-white mb-2">How can I help you?</h2>
+              <p className="text-gray-400 text-sm max-w-sm">
+                Ask me anything — ideas, explanations, writing help, or just a quick question.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-4 max-w-md w-full">
+              {suggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onClick={() => {
+                    setInput(suggestion);
+                    textareaRef.current?.focus();
+                  }}
+                  className="text-left text-xs text-gray-300 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-3 py-2 transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          messages.map((m) => {
+            const text = m.parts
+              .filter((p) => p.type === "text")
+              .map((p) => (p as { type: "text"; text: string }).text)
+              .join("");
+
+            return (
+              <div
+                key={m.id}
+                className={`flex gap-3 max-w-3xl mx-auto ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${
+                    m.role === "user" ? "bg-indigo-600" : "bg-gray-700"
+                  }`}
+                >
+                  {m.role === "user" ? <User size={16} /> : <Bot size={16} />}
+                </div>
+                <div
+                  className={`rounded-2xl px-4 py-3 max-w-[80%] text-sm leading-relaxed whitespace-pre-wrap ${
+                    m.role === "user"
+                      ? "bg-indigo-600 text-white rounded-tr-sm"
+                      : "bg-gray-800 text-gray-100 rounded-tl-sm"
+                  }`}
+                >
+                  {text}
+                </div>
+              </div>
+            );
+          })
+        )}
+
+        {isLoading && (
+          <div className="flex gap-3 max-w-3xl mx-auto">
+            <div className="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
+              <Bot size={16} />
+            </div>
+            <div className="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3">
+              <Loader2 size={16} className="animate-spin text-indigo-400" />
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="px-4 pb-6 pt-2 border-t border-gray-800 bg-gray-900">
+        <div className="flex gap-3 max-w-3xl mx-auto items-end">
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask me anything... (Enter to send, Shift+Enter for new line)"
+            rows={1}
+            className="flex-1 bg-gray-800 text-gray-100 placeholder-gray-500 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-700 max-h-32 overflow-y-auto"
+            style={{ minHeight: "48px" }}
+          />
+          <button
+            onClick={submit}
+            disabled={!input.trim() || isLoading}
+            className="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
           >
-            Documentation
-          </a>
+            <Send size={18} />
+          </button>
         </div>
-      </main>
+        <p className="text-center text-xs text-gray-600 mt-2">
+          Free · Open source · Built by Soumeet
+        </p>
+      </div>
     </div>
   );
 }
