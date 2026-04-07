@@ -5,8 +5,6 @@ const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-export const runtime = "edge";
-
 const SYSTEM_PROMPT = `You are a smart, friendly personal assistant. You help with:
 - Brainstorming and quick ideas
 - Explaining concepts clearly
