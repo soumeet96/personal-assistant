@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Personal Assistant",
-  description: "A free personal AI assistant powered by Llama 3.3 on Groq",
+  title: "MeetSou",
+  description: "MeetSou — a free personal AI assistant powered by Llama 3.3 on Groq",
 };
 
 export default function RootLayout({

@@ -1,6 +1,7 @@
 services:
-  app:
+  meetsou:
     build: .
+    image: soumeet96/personal-assistant-meetsou:latest
     ports:
       - "3000:3000"
     environment:

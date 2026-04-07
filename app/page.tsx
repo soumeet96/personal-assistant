@@ -47,7 +47,7 @@ export default function Home() {
             <Bot size={18} />
           </div>
           <div>
-            <h1 className="font-semibold text-white">Personal Assistant</h1>
+            <h1 className="font-semibold text-white">MeetSou</h1>
             <p className="text-xs text-gray-400">Powered by Llama 3.3 · Groq</p>
           </div>
         </div>
