@@ -1,0 +1,12 @@
+# Credentials — never commit
+*.json
+terraform.tfvars
+
+# Terraform state — contains sensitive data
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl

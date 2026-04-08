@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meetsou
+  namespace: meetsou
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meetsou
+  template:
+    metadata:
+      labels:
+        app: meetsou
+    spec:
+      containers:
+        - name: meetsou
+          image: soumeet96/personal-assistant-meetsou:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: meetsou-secret
+                  key: GROQ_API_KEY
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
